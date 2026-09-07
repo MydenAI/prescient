@@ -1,0 +1,27 @@
+# Build, measurement, and coverage output
+/target/
+**/target/
+/benchmark-results/
+/coverage/
+*.profraw
+*.profdata
+__pycache__/
+*.py[cod]
+perf.data
+perf.data.old
+
+# Local work records and agent caches
+/tickets/
+/.cgrep/
+/.codex/
+/.claude/
+
+# Local editor and environment state
+/.idea/
+/.vscode/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.swp
+*.swo

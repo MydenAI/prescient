@@ -1,0 +1,68 @@
+[package]
+name = "prescient"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.93"
+description = "Typed, statically specialized local and process channels"
+license = "Apache-2.0"
+readme = "README.md"
+documentation = "https://docs.rs/prescient"
+homepage = "https://myden.ai"
+repository = "https://github.com/MydenAI/prescient"
+keywords = ["channel", "mpsc", "mpmc", "ipc", "concurrency"]
+categories = ["concurrency"]
+autobins = false
+include = [
+    "/src/**", "/examples/**", "/tests/**", "/docs/**",
+    "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/NOTICE",
+]
+
+[dependencies]
+atomic-waker = "1.1"
+parking_lot = "0.12"
+parking_lot_core = "0.9"
+socket2 = { version = "0.6", features = ["all"] }
+
+[target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
+libc = "0.2"
+
+[target.'cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))'.dependencies]
+getrandom = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_Memory",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading",
+] }
+
+# `loom` is a known cfg we set by hand (RUSTFLAGS="--cfg loom") for model checks.
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(loom)'] }
+
+[dev-dependencies]
+# crossbeam-channel is a DEV-only baseline for the MPMC bench. The library itself
+# still has no crossbeam dependency; this never ships in the crate's deps.
+crossbeam-channel = "0.5"
+flume = "0.11"
+# Async support is benchmark-only and never enters Prescient's dependency graph.
+kanal = { version = "0.1", default-features = false, features = ["async"] }
+thingbuf = "0.1"
+tokio = { version = "1", features = ["rt-multi-thread", "sync"] }
+
+# These crates opt into their own private `cfg(loom)` builds when our Loom flag
+# is present, but do not ship Loom as a normal dependency. Keep benchmark-only
+# competitors out of model-check builds.
+[target.'cfg(not(loom))'.dev-dependencies]
+async-channel = "2"
+
+# loom is only pulled in under `--cfg loom` for model-checking.
+[target.'cfg(loom)'.dependencies]
+loom = { version = "0.7", features = ["futures"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

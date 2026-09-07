@@ -1,0 +1,13 @@
+[package]
+name = "prescient-perf-probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+prescient = { path = "../.." }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
